@@ -29,25 +29,25 @@ export default async function MenuPage() {
     );
 
     return (
-      <main className="min-h-screen bg-black px-5 py-20 text-white">
+      <main className="min-h-screen bg-white px-5 py-20 text-black">
         <div className="mx-auto max-w-xl">
 
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
 
-            <p className="text-xs font-semibold tracking-[0.25em] text-red-400">
+            <p className="text-xs font-semibold tracking-[0.25em] text-red-600">
               MAO LICORES
             </p>
 
-            <h1 className="mt-3 text-xl font-semibold text-red-300">
+            <h1 className="mt-3 text-xl font-semibold text-red-700">
               Error conectando con Supabase
             </h1>
 
-            <p className="mt-3 text-sm text-white/50">
+            <p className="mt-3 text-sm text-black/50">
               La aplicación está publicada, pero no pudo obtener
               las categorías.
             </p>
 
-            <pre className="mt-5 max-h-80 overflow-auto rounded-xl bg-black/50 p-4 text-xs leading-5 text-red-300">
+            <pre className="mt-5 max-h-80 overflow-auto rounded-xl bg-black p-4 text-xs leading-5 text-red-300">
               {JSON.stringify(error, null, 2)}
             </pre>
 
@@ -55,7 +55,7 @@ export default async function MenuPage() {
 
           <Link
             href="/"
-            className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-xs tracking-widest text-white/60 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+            className="mt-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-black px-5 py-3 text-xs tracking-widest text-white transition hover:bg-black/80"
           >
             <span className="text-base">
               ←
@@ -76,13 +76,13 @@ export default async function MenuPage() {
      ========================================= */
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-white text-black">
 
       {/* =========================================
           ENCABEZADO
           ========================================= */}
 
-      <header className="border-b border-white/10">
+      <header className="border-b border-black/10">
 
         <div className="mx-auto max-w-6xl px-5 py-6">
 
@@ -90,7 +90,7 @@ export default async function MenuPage() {
 
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs tracking-widest text-white/50 transition hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.02] px-4 py-2 text-xs tracking-widest text-black/60 transition hover:border-black/20 hover:bg-black hover:text-white"
             >
               <span className="text-base leading-none">
                 ←
@@ -124,7 +124,7 @@ export default async function MenuPage() {
 
         <div className="text-center">
 
-          <p className="text-[10px] font-medium tracking-[0.4em] text-white/30">
+          <p className="text-[10px] font-medium tracking-[0.4em] text-black/40">
             MAO LICORES
           </p>
 
@@ -132,7 +132,7 @@ export default async function MenuPage() {
             Nuestra Carta
           </h1>
 
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-white/40">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-black/50">
             Descubre nuestra selección y encuentra todo lo que
             necesitas para disfrutar tu noche.
           </p>
@@ -149,9 +149,9 @@ export default async function MenuPage() {
 
         {categoryList.length === 0 ? (
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-20 text-center">
+          <div className="rounded-3xl border border-black/10 bg-black/[0.02] px-5 py-20 text-center">
 
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-black/40">
               No hay categorías disponibles.
             </p>
 
@@ -165,15 +165,19 @@ export default async function MenuPage() {
 
               <Link
                 key={category.id}
-                href={`/menu/${category.slug}`}
+                href={
+                  category.slug === "vinos"
+                    ? "/menu/vinos"
+                    : `/menu/${category.slug}`
+                }
                 className="group"
               >
 
-                <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05]">
+                <article className="relative overflow-hidden rounded-3xl border border-black/10 bg-black/[0.02] transition-all duration-500 hover:-translate-y-1 hover:border-black/20 hover:shadow-lg">
 
                   {/* FOTO */}
 
-                  <div className="relative aspect-[4/5] overflow-hidden bg-white/[0.03]">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-black/[0.02]">
 
                     {category.image_url ? (
 
@@ -195,7 +199,7 @@ export default async function MenuPage() {
                             className="mx-auto w-16 opacity-20"
                           />
 
-                          <p className="mt-4 text-[10px] tracking-[0.3em] text-white/20">
+                          <p className="mt-4 text-[10px] tracking-[0.3em] text-black/20">
                             MAO LICORES
                           </p>
 
@@ -207,7 +211,7 @@ export default async function MenuPage() {
 
                     {/* DEGRADADO */}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                     {/* TEXTO */}
 
@@ -217,17 +221,17 @@ export default async function MenuPage() {
 
                         <div>
 
-                          <h2 className="text-2xl font-semibold tracking-tight">
+                          <h2 className="text-2xl font-semibold tracking-tight text-white">
                             {category.name}
                           </h2>
 
-                          <p className="mt-2 text-xs tracking-[0.2em] text-white/40 transition group-hover:text-white/70">
+                          <p className="mt-2 text-xs tracking-[0.2em] text-white/60 transition group-hover:text-white">
                             VER PRODUCTOS
                           </p>
 
                         </div>
 
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/30 text-lg text-white/60 backdrop-blur-sm transition group-hover:border-white/40 group-hover:bg-white group-hover:text-black">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-black/30 text-lg text-white/70 backdrop-blur-sm transition group-hover:border-white group-hover:bg-white group-hover:text-black">
                           →
                         </div>
 
@@ -253,15 +257,15 @@ export default async function MenuPage() {
           PIE
           ========================================= */}
 
-      <footer className="border-t border-white/10">
+      <footer className="border-t border-black/10">
 
         <div className="mx-auto max-w-6xl px-5 py-8 text-center">
 
-          <p className="text-[10px] tracking-[0.3em] text-white/25">
+          <p className="text-[10px] tracking-[0.3em] text-black/30">
             MAO LICORES
           </p>
 
-          <p className="mt-2 text-xs text-white/20">
+          <p className="mt-2 text-xs text-black/30">
             Est. 1995 • El punto exacto de tu noche
           </p>
 

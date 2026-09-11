@@ -4,6 +4,7 @@ import {
   ChangeEvent,
   FormEvent,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -26,6 +27,7 @@ type Product = {
   available: boolean;
   image_url: string | null;
   category_id: string;
+  subcategory: string | null;
 };
 
 export default function AdminPage() {
@@ -33,14 +35,16 @@ export default function AdminPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const productSectionRef = useRef<HTMLElement | null>(null);
 
   // PRODUCTO
   const [productImage, setProductImage] = useState<File | null>(null);
   const [productImagePreview, setProductImagePreview] = useState("");
 
-  const [productName, setProductName] = useState("");
-  const [productCategoryId, setProductCategoryId] = useState("");
-  const [productPresentation, setProductPresentation] = useState("");
+ const [productName, setProductName] = useState("");
+const [productCategoryId, setProductCategoryId] = useState("");
+const [productSubcategory, setProductSubcategory] = useState("");
+const [productPresentation, setProductPresentation] = useState("");
   const [productPrice, setProductPrice] = useState("");
   const [productAvailable, setProductAvailable] = useState(true);
   const [editingProductId, setEditingProductId] = useState<string | null>(
@@ -102,8 +106,8 @@ export default function AdminPage() {
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, name, presentation, price, available, image_url, category_id"
-      )
+  "id, name, presentation, price, available, image_url, category_id, subcategory"
+)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -160,6 +164,7 @@ export default function AdminPage() {
     setProductImagePreview("");
     setProductName("");
     setProductCategoryId("");
+    setProductSubcategory("");
     setProductPresentation("");
     setProductPrice("");
     setProductAvailable(true);
@@ -181,22 +186,24 @@ export default function AdminPage() {
   // EDITAR PRODUCTO
   // =========================================
 
-  function startEditingProduct(product: Product) {
-    setEditingProductId(product.id);
-    setProductName(product.name);
-    setProductCategoryId(product.category_id);
-    setProductPresentation(product.presentation ?? "");
-    setProductPrice(String(product.price));
-    setProductAvailable(product.available);
-    setProductImage(null);
-    setProductImagePreview(product.image_url ?? "");
+function startEditingProduct(product: Product) {
+  setEditingProductId(product.id);
+  setProductName(product.name);
+  setProductCategoryId(product.category_id);
+  setProductSubcategory(product.subcategory ?? "");
+  setProductPresentation(product.presentation ?? "");
+  setProductPrice(String(product.price));
+  setProductAvailable(product.available);
+  setProductImage(null);
+  setProductImagePreview(product.image_url ?? "");
 
-    window.scrollTo({
-      top: 0,
+  setTimeout(() => {
+    productSectionRef.current?.scrollIntoView({
       behavior: "smooth",
+      block: "start",
     });
-  }
-
+  }, 50);
+}
   // =========================================
   // EDITAR CATEGORÍA
   // =========================================
@@ -261,12 +268,24 @@ export default function AdminPage() {
       }
 
       if (!productCategoryId) {
-        throw new Error("Selecciona una categoría.");
-      }
+  throw new Error("Selecciona una categoría.");
+}
 
-      if (!productPresentation.trim()) {
-        throw new Error("Escribe la presentación.");
-      }
+const selectedCategory = categories.find(
+  (category) => category.id === productCategoryId
+);
+
+const isWineCategory =
+  selectedCategory?.slug?.toLowerCase() === "vinos" ||
+  selectedCategory?.name?.toLowerCase() === "vinos";
+
+if (isWineCategory && !productSubcategory) {
+  throw new Error("Selecciona una subcategoría para Vinos.");
+}
+
+if (!productPresentation.trim()) {
+  throw new Error("Escribe la presentación.");
+}
 
       if (!productPrice || Number(productPrice) < 0) {
         throw new Error("Escribe un precio válido.");
@@ -284,30 +303,43 @@ export default function AdminPage() {
       }
 
       if (editingProductId) {
-        const { error } = await supabase
-          .from("products")
-          .update({
-            category_id: productCategoryId,
-            name: productName.trim(),
-            presentation: productPresentation.trim(),
-            price: Number(productPrice),
-            available: productAvailable,
-            image_url: imageUrl,
-          })
-          .eq("id", editingProductId);
+        const { data: updatedProduct, error } = await supabase
+  .from("products")
+  .update({
+    category_id: productCategoryId,
+    subcategory: productSubcategory || null,
+    name: productName.trim(),
+    presentation: productPresentation.trim(),
+    price: Number(productPrice),
+    available: productAvailable,
+    image_url: imageUrl,
+  })
+  .eq("id", editingProductId)
+  .select("id, name, subcategory")
+  .single();
 
-        if (error) {
-          throw new Error(
-            `No se pudo actualizar el producto: ${error.message}`
-          );
-        }
+if (error) {
+  throw new Error(
+    `No se pudo actualizar el producto: ${error.message}`
+  );
+}
 
-        setMessage("Producto actualizado correctamente.");
+if (!updatedProduct) {
+  throw new Error(
+    "No se encontró el producto para actualizar."
+  );
+}
+
+console.log("PRODUCTO ACTUALIZADO:", updatedProduct);
+
+setMessage("Producto actualizado correctamente.");
+        
       } else {
         const { error } = await supabase
           .from("products")
           .insert({
             category_id: productCategoryId,
+            subcategory: productSubcategory || null,
             name: productName.trim(),
             presentation: productPresentation.trim(),
             price: Number(productPrice),
@@ -884,9 +916,8 @@ export default function AdminPage() {
 
         </section>
 
-        {/* PRODUCTOS */}
-
-        <section>
+       {/* PRODUCTOS */}
+       <section ref={productSectionRef}>
 
           <div className="mb-5">
 
@@ -979,10 +1010,24 @@ export default function AdminPage() {
               </label>
 
               <select
-                value={productCategoryId}
-                onChange={(event) =>
-                  setProductCategoryId(event.target.value)
-                }
+  value={productCategoryId}
+  onChange={(event) => {
+    const value = event.target.value;
+
+    setProductCategoryId(value);
+
+    const selectedCategory = categories.find(
+  (category) => category.id === value
+);
+
+const isWineCategory =
+  selectedCategory?.slug?.toLowerCase() === "vinos" ||
+  selectedCategory?.name?.toLowerCase() === "vinos";
+
+if (!isWineCategory) {
+  setProductSubcategory("");
+}
+  }}
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
               >
 
@@ -1011,6 +1056,71 @@ export default function AdminPage() {
               </select>
 
             </div>
+                        {(() => {
+  const selectedCategory = categories.find(
+    (category) => category.id === productCategoryId
+  );
+
+  const isWineCategory =
+    selectedCategory?.slug?.toLowerCase() === "vinos" ||
+    selectedCategory?.name?.toLowerCase() === "vinos";
+
+  return isWineCategory;
+})() && (
+              <div className="mt-6">
+
+                <label className="mb-2 block text-sm text-white/70">
+                  Subcategoría
+                </label>
+
+                <select
+                  value={productSubcategory}
+                  onChange={(event) =>
+                    setProductSubcategory(event.target.value)
+                  }
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+                >
+
+                  <option
+                    value=""
+                    disabled
+                    className="bg-black"
+                  >
+                    Selecciona una subcategoría
+                  </option>
+
+                  <option
+                    value="vino-tinto"
+                    className="bg-black"
+                  >
+                    Vino Tinto
+                  </option>
+
+                  <option
+                    value="vino-rosado"
+                    className="bg-black"
+                  >
+                    Vino Rosado
+                  </option>
+
+                  <option
+                    value="vino-blanco"
+                    className="bg-black"
+                  >
+                    Vino Blanco
+                  </option>
+
+                  <option
+                    value="champanas"
+                    className="bg-black"
+                  >
+                    Champañas
+                  </option>
+
+                </select>
+
+              </div>
+            )}
 
             <div className="mt-6">
 
